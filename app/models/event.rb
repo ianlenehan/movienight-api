@@ -3,23 +3,23 @@ class Event < ApplicationRecord
   has_many :ratings
   belongs_to :group
 
-  def is_user_attending?(user)
+  def participated_by?(user)
     users.include?(user)
   end
 
-  def user_has_already_rated(user)
+  def rated_by?(user)
     ratings.exists?(user_id: user.id)
   end
 
-  def remove_rating(user)
+  def remove_rating_for(user)
     ratings.destroy(ratings.where(user_id: user.id))
   end
 
-  def find_rating(user)
+  def ratings_for(user)
     ratings.where(user_id: user.id)
   end
 
-  def get_average_rating(event)
+  def average_rating
     ratings.pluck(:rating_score).inject(0, :+) / ratings.count
   end
 end
