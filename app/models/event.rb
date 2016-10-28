@@ -11,14 +11,6 @@ class Event < ApplicationRecord
     ratings.exists?(user_id: user.id)
   end
 
-  def remove_rating_for(user)
-    ratings.destroy(ratings.where(user_id: user.id))
-  end
-
-  def ratings_for(user)
-    ratings.where(user_id: user.id)
-  end
-
   def average_rating
     ratings.pluck(:rating_score).inject(0, :+) / ratings.count
   end

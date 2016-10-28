@@ -50,14 +50,9 @@ module Api::V1
     def add_rating
       event = Event.find(params[:event][:id])
       user = User.find_by(access_token: params[:user][:access_token])
-      rating = params[:event][:rating]
-      event.remove_rating_for(user) if event.rated_by?(user)
-      rating_record = Rating.create
-      if rating_record.update(user_id: user.id, rating_score: rating, event_id: event.id)
-        render json: rating_record
-      else
-        render json: { errors: rating_record.errors }
-      end
+      rating = Rating.find_or_initialize_by(user_id: user.id, event_id: event.id)
+      rating.update(rating_score: params[:event][:rating])
+      render json: rating
     end
 
     def show_rating
