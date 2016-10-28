@@ -12,6 +12,6 @@ class Event < ApplicationRecord
   end
 
   def average_rating
-    ratings.pluck(:rating_score).inject(0, :+) / ratings.count
+    ratings.pluck(:rating_score).inject(0, :+) / (ratings.count.nonzero? || 1)
   end
 end

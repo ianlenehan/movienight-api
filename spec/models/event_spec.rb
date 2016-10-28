@@ -42,4 +42,25 @@ RSpec.describe Event, :type => :model do
       end
     end
   end
+
+  describe "average_rating" do
+    let(:group) { FactoryGirl.create(:group, group_name: "yo") }
+    let(:user) { FactoryGirl.create(:user) }
+    let(:event) { FactoryGirl.create(:event, users: [user], group_id: group.id) }
+
+    context "has ratings" do
+      let!(:ratings) { FactoryGirl.create(:rating, user: user, event: event, rating_score: 70) }
+      let!(:ratings) { FactoryGirl.create(:rating, user: user, event: event, rating_score: 80) }
+
+      it "average of 70 and 90" do
+        expect(event.average_rating).to eq(80)
+      end
+    end
+
+    context "no rating" do
+      it "is 0" do
+        expect(event.average_rating).to eq(0)
+      end
+    end
+  end
 end
