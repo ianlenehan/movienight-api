@@ -7,7 +7,7 @@ module Api::V1
         event: event,
         group: event.group,
         attendees: event.users,
-        attending: is_user_attending?(current_user, event)
+        attending: event.is_user_attending?(current_user)
       }
     end
 
@@ -51,7 +51,7 @@ module Api::V1
       event = Event.find(params[:event][:id])
       user = User.find_by(access_token: params[:user][:access_token])
       rating = params[:event][:rating]
-      remove_rating(event, user) if user_has_already_rated(event, user)
+      event.remove_rating(user) if event.user_has_already_rated(user)
       rating_record = Rating.create
       if rating_record.update(user_id: user.id, rating_score: rating, event_id: event.id)
         render json: rating_record
@@ -64,7 +64,7 @@ module Api::V1
       event = Event.find(params[:id])
       user = User.find(params[:user_id])
       average = get_average_rating(event)
-      if rating = find_rating(event, user)
+      if rating = event.find_rating(user)
         render json: { rating: rating, average: average }
       else
         render json: { rating: 0, average: average }
@@ -92,23 +92,6 @@ module Api::V1
       else
         render json: { errors: event.errors }
       end
-
-    end
-
-    def is_user_attending?(user, event)
-      event.users.include?(user)
-    end
-
-    def user_has_already_rated(event, user)
-      event.ratings.exists?(user_id: user.id)
-    end
-
-    def remove_rating(event, user)
-      event.ratings.destroy(event.ratings.where(:user_id => user.id))
-    end
-
-    def find_rating(event, user)
-      event.ratings.where(:user_id => user.id)
     end
 
     def get_average_rating(event)
