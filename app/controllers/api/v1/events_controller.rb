@@ -1,7 +1,6 @@
 module Api::V1
   class EventsController < ApplicationController
     def show
-      event = Event.find(params[:event][:id])
       render json: {
         event: event,
         group: event.group,
@@ -24,43 +23,48 @@ module Api::V1
     end
 
     def add_movie
-      event = Event.find(params[:event_id])
+      event_1 = Event.find(params[:event_id])
       if event.update(imdb_id: params[:movie])
-        render json: event, status: 201
+        render json: event_1, status: 201
       else
-        render json: { errors: event.errors }, status: 422
+        render json: { errors: event_1.errors }, status: 422
       end
     end
 
     def attending
-      event = Event.find(params[:event][:id])
       event.users << user
       render json: event.users
     end
 
     def not_attending
-      event = Event.find(params[:event][:id])
       event.users.delete(user)
       render json: event.users
     end
 
     def add_rating
-      event = Event.find(params[:event][:id])
       rating = Rating.find_or_initialize_by(user_id: user.id, event_id: event.id)
       rating.update(rating_score: params[:event][:rating])
       render json: rating
     end
 
     def show_rating
-      event = Event.find(params[:id])
+      event_1 = Event.find(params[:id])
       user_1 = User.find(params[:user_id])
-      render json: { rating: event.rating_for(user_1), average: event.average_rating }
+      render json: { rating: event_1.rating_for(user_1), average: event_1.average_rating }
     end
 
     private
 
+    def event
+      @event ||= Event.find(event_params[:id])
+    end
+
+    def event_params
+      params.require(:event).permit(:id)
+    end
+
     def user
-      user ||= User.find_by(access_token: user_params.access_token)
+      @user ||= User.find_by(access_token: user_params[:access_token])
     end
 
     def user_params
