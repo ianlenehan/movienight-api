@@ -49,8 +49,12 @@ RSpec.describe Event, :type => :model do
     let(:event) { FactoryGirl.create(:event, users: [user], group_id: group.id) }
 
     context "has ratings" do
-      let!(:ratings) { FactoryGirl.create(:rating, user: user, event: event, rating_score: 70) }
-      let!(:ratings) { FactoryGirl.create(:rating, user: user, event: event, rating_score: 80) }
+      let!(:ratings) do
+        [
+          FactoryGirl.create(:rating, user: user, event: event, rating_score: 70),
+          FactoryGirl.create(:rating, user: user, event: event, rating_score: 90)
+        ]
+      end
 
       it "average of 70 and 90" do
         expect(event.average_rating).to eq(80)
