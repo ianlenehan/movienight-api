@@ -112,7 +112,7 @@ module Api::V1
     end
 
     def get_average_rating(event)
-      count = event.ratings.count
+      count = event.ratings.count < 1 ? 1 : event.ratings.count
       ratings = event.ratings.pluck(:rating_score)
       average = ratings.inject(0, :+) / count
     end
