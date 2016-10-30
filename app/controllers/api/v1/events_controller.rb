@@ -67,7 +67,7 @@ module Api::V1
       if rating = find_rating(event, user)
         render json: { rating: rating, average: average }
       else
-        render json: { rating: 0, average: average }
+        render json: { rating: [0], average: average }
       end
     end
 
@@ -112,6 +112,7 @@ module Api::V1
     end
 
     def get_average_rating(event)
+      # next line prevents divided by zero exception error
       count = event.ratings.count < 1 ? 1 : event.ratings.count
       ratings = event.ratings.pluck(:rating_score)
       average = ratings.inject(0, :+) / count
