@@ -67,7 +67,7 @@ module Api::V1
       if rating = find_rating(event, user)
         render json: { rating: rating, average: average }
       else
-        render json: { rating: [0], average: average }
+        render json: { rating: {rating_score: 0}, average: average }
       end
     end
 
