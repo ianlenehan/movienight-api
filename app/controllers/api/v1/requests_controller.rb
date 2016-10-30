@@ -14,7 +14,15 @@ module Api::V1
       else
         render plain: "You have already requested to join this group."
       end
+    end
 
+    def deny_request
+      request = Request.find(params[:id])
+      if request.destroy
+        render plain: "Request has been denied."
+      else
+        render json: request.errors
+      end
     end
 
     private
