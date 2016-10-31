@@ -91,5 +91,28 @@ module Api::V1
         render json: { errors: event.errors }
       end
     end
+
+    def is_user_attending?(user, event)
+      event.users.include?(user)
+    end
+
+    def user_has_already_rated(event, user)
+      event.ratings.exists?(user_id: user.id)
+    end
+
+    def remove_rating(event, user)
+      event.ratings.destroy(event.ratings.where(:user_id => user.id))
+    end
+
+    def find_rating(event, user)
+      event.ratings.where(:user_id => user.id)
+    end
+
+    def get_average_rating(event)
+      # next line prevents divided by zero exception error
+      count = event.ratings.count < 1 ? 1 : event.ratings.count
+      ratings = event.ratings.pluck(:rating_score)
+      average = ratings.inject(0, :+) / count
+    end
   end
 end

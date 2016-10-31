@@ -12,10 +12,16 @@ class User < ApplicationRecord
   has_and_belongs_to_many :groups
   has_many :requests
 
+  def name
+    self.name_first + ' ' + self.name_last
+  end
+
   private
 
   def update_access_token!
     self.access_token = "#{self.id}:#{Devise.friendly_token}"
     save
   end
+
+
 end

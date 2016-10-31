@@ -9,7 +9,8 @@ module Api::V1
     def members
       group = Group.find(params[:id])
       members = group.users
-      render json: members
+      requests = membership_requests(group)
+      render json: { members: members, requests: requests }
     end
 
     def create_or_update
@@ -22,10 +23,12 @@ module Api::V1
 
     def add_user
       group = Group.find(params[:group_id])
-      user = User.find(params[:id])
-      group.users >> user
-
-      render plain: "#{user.first_name} has been successfully added to the #{group.group_name} group."
+      user = User.find(params[:user_id])
+      request = Request.find(params[:request_id])
+      if group.users << user
+        request.destroy
+        render plain: "#{user.name} has been successfully added to the #{group.group_name} group."
+      end
     end
 
     def events
@@ -56,6 +59,13 @@ module Api::V1
         render json: group
       else
         render json: { errors: group.errors }
+      end
+    end
+
+    def membership_requests(group)
+      requests = Request.where(group: group)
+      requests.map do |request|
+        { request: request.id, user: request.user.name, user_id: request.user.id }
       end
     end
 
