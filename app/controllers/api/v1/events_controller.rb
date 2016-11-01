@@ -1,13 +1,11 @@
 module Api::V1
   class EventsController < ApplicationController
     def show
-      event = Event.find(params[:event][:id])
-      current_user = User.find_by(access_token: params[:user][:access_token])
       render json: {
         event: event,
         group: event.group,
         attendees: event.users,
-        attending: is_user_attending?(current_user, event)
+        attending: event.participated_by?(current_user)
       }
     end
 
@@ -25,53 +23,55 @@ module Api::V1
     end
 
     def add_movie
-      event = Event.find(params[:event_id])
+      event_1 = Event.find(params[:event_id])
       if event.update(imdb_id: params[:movie])
-        render json: event, status: 201
+        render json: event_1, status: 201
       else
-        render json: { errors: event.errors }, status: 422
+        render json: { errors: event_1.errors }, status: 422
       end
     end
 
     def attending
-      event = Event.find(params[:event][:id])
-      current_user = User.find_by(access_token: params[:user][:access_token])
       event.users << current_user
       render json: event.users
     end
 
     def not_attending
-      event = Event.find(params[:event][:id])
-      user = User.find_by(access_token: params[:user][:access_token])
-      event.users.delete(user)
+      event.users.delete(current_user)
       render json: event.users
     end
 
     def add_rating
-      event = Event.find(params[:event][:id])
-      user = User.find_by(access_token: params[:user][:access_token])
-      rating = params[:event][:rating]
-      remove_rating(event, user) if user_has_already_rated(event, user)
-      rating_record = Rating.create
-      if rating_record.update(user_id: user.id, rating_score: rating, event_id: event.id)
-        render json: rating_record
-      else
-        render json: { errors: rating_record.errors }
-      end
+      rating = Rating.find_or_initialize_by(user_id: current_user.id, event_id: event.id)
+      rating.update(rating_score: params[:event][:rating])
+      render json: rating
     end
 
     def show_rating
-      event = Event.find(params[:id])
-      user = User.find(params[:user_id])
-      average = get_average_rating(event)
-      if rating = find_rating(event, user)
-        render json: { rating: rating, average: average }
-      else
-        render json: { rating: {rating_score: 0}, average: average }
-      end
+      render json: { rating: event.rating_for(user), average: event.average_rating }
     end
 
     private
+
+    def event
+      @event ||= Event.find(event_params[:id])
+    end
+
+    def event_params
+      params.require(:event).permit(:id)
+    end
+
+    def current_user
+      @current_user ||= User.find_by(access_token: user_params[:access_token])
+    end
+
+    def user
+      @user ||= User.find(user_params[:id])
+    end
+
+    def user_params
+      params.require(:user).permit(:access_token, :id)
+    end
 
     def create(params)
       event = Event.new
@@ -81,7 +81,7 @@ module Api::V1
       if event.save
         render json: event
       else
-        render json: { errors: user.errors }
+        render json: { errors: current_user.errors }
       end
     end
 
@@ -92,30 +92,6 @@ module Api::V1
       else
         render json: { errors: event.errors }
       end
-
-    end
-
-    def is_user_attending?(user, event)
-      event.users.include?(user)
-    end
-
-    def user_has_already_rated(event, user)
-      event.ratings.exists?(user_id: user.id)
-    end
-
-    def remove_rating(event, user)
-      event.ratings.destroy(event.ratings.where(:user_id => user.id))
-    end
-
-    def find_rating(event, user)
-      event.ratings.where(:user_id => user.id)
-    end
-
-    def get_average_rating(event)
-      # next line prevents divided by zero exception error
-      count = event.ratings.count < 1 ? 1 : event.ratings.count
-      ratings = event.ratings.pluck(:rating_score)
-      average = ratings.inject(0, :+) / count
     end
   end
 end
