@@ -48,8 +48,7 @@ module Api::V1
     end
 
     def show_rating
-      event_1 = Event.find(params[:id])
-      render json: { rating: event_1.rating_for(user), average: event_1.average_rating }
+      render json: { rating: event.rating_for(user), average: event.average_rating }
     end
 
     private
