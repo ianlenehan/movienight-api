@@ -67,4 +67,24 @@ RSpec.describe Event, :type => :model do
       end
     end
   end
+
+  describe "rating_for" do
+    let(:group) { FactoryGirl.create(:group, group_name: "yo") }
+    let(:user) { FactoryGirl.create(:user) }
+    let(:event) { FactoryGirl.create(:event, users: [user], group_id: group.id) }
+
+    context "event has ratings by a particular user" do
+      let!(:rating) { FactoryGirl.create(:rating, user: user, event: event, rating_score: 10) }
+
+      it "returns true" do
+        expect(event.rating_for(user)).to eq(rating)
+      end
+    end
+
+    context "event does not have ratings by user" do
+      it "returns false" do
+        expect(event.rating_for(user)).to eq(nil)
+      end
+    end
+  end
 end

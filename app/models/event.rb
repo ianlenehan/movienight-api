@@ -14,4 +14,8 @@ class Event < ApplicationRecord
   def average_rating
     ratings.pluck(:rating_score).inject(0, :+) / (ratings.count.nonzero? || 1)
   end
+
+  def rating_for(user)
+    ratings.find_by(user_id: user.id)
+  end
 end
