@@ -11,9 +11,9 @@ module Api::V1
 
     def create_or_update
       if params[:event][:id] > 0
-        update(params)
+        update
       else
-        create(params)
+        create
       end
     end
 
@@ -59,11 +59,11 @@ module Api::V1
     private
 
     def event
-      @event ||= Event.find(event_params[:id])
+      @event ||= Event.find(params[:event][:id])
     end
 
     def event_params
-      params.require(:event).permit(:id, :location, :date, :group_id)
+      params.require(:event).permit(:location, :date, :group_id)
     end
 
     def current_user
@@ -78,20 +78,13 @@ module Api::V1
       params.require(:user).permit(:access_token, :id)
     end
 
-    def create(params)
-      new_event = Event.new
-      new_event.location = params[:event][:location]
-      new_event.date = params[:event][:date]
-      new_event.group_id = params[:event][:group_id]
-      if new_event.save
-        render json: new_event
-      else
-        render json: { errors: new_event.errors }
-      end
+    def create
+      new_event = Event.create(event_params)
+      render json: new_event
     end
 
-    def update(params)
-      if event.update(location: params[:event][:location], date: params[:event][:date])
+    def update
+      if event.update(event_params)
         render json: event
       else
         render json: { errors: event.errors }
