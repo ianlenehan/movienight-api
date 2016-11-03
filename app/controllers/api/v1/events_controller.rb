@@ -10,7 +10,7 @@ module Api::V1
     end
 
     def create_or_update
-      if params[:id] > 0
+      if params[:event][:id] > 0
         update(params)
       else
         create(params)
@@ -23,11 +23,10 @@ module Api::V1
     end
 
     def add_movie
-      event_1 = Event.find(params[:event_id])
       if event.update(imdb_id: params[:movie])
-        render json: event_1, status: 201
+        render json: event, status: 201
       else
-        render json: { errors: event_1.errors }, status: 422
+        render json: { errors: event.errors }, status: 422
       end
     end
 
@@ -44,11 +43,17 @@ module Api::V1
     def add_rating
       rating = Rating.find_or_initialize_by(user_id: current_user.id, event_id: event.id)
       rating.update(rating_score: params[:event][:rating])
-      render json: rating
+      render json: {
+        rating: rating,
+        average: event.average_rating
+      }
     end
 
     def show_rating
-      render json: { rating: event.rating_for(user), average: event.average_rating }
+      render json: {
+        rating: event.rating_for(user),
+        average: event.average_rating
+      }
     end
 
     private
@@ -58,7 +63,7 @@ module Api::V1
     end
 
     def event_params
-      params.require(:event).permit(:id)
+      params.require(:event).permit(:id, :location, :date, :group_id)
     end
 
     def current_user
@@ -74,20 +79,19 @@ module Api::V1
     end
 
     def create(params)
-      event = Event.new
-      event.location = params[:location]
-      event.date = params[:date]
-      event.group_id = params[:group_id]
-      if event.save
-        render json: event
+      new_event = Event.new
+      new_event.location = params[:event][:location]
+      new_event.date = params[:event][:date]
+      new_event.group_id = params[:event][:group_id]
+      if new_event.save
+        render json: new_event
       else
-        render json: { errors: current_user.errors }
+        render json: { errors: new_event.errors }
       end
     end
 
     def update(params)
-      event = Event.find(params[:id])
-      if event.update(location: params[:location], date: params[:date])
+      if event.update(location: params[:event][:location], date: params[:event][:date])
         render json: event
       else
         render json: { errors: event.errors }

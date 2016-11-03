@@ -15,7 +15,7 @@ Rails.application.routes.draw do
       post '/events/add_movie' => 'events#add_movie'
       post '/events/rating' => 'events#add_rating'
       post '/events/attending' => 'events#attending'
-      get '/events/rating/:id/:user_id' => 'events#show_rating'
+      post '/events/show_rating' => 'events#show_rating'
       post '/events/not_attending' => 'events#not_attending'
 
       post '/groups' => 'groups#create_or_update'

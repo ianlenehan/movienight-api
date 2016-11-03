@@ -14,7 +14,7 @@ module Api::V1
     end
 
     def create_or_update
-      if params[:id].length > 0
+      if params[:id].to_i > 0
         update(params)
       else
         create(params)
