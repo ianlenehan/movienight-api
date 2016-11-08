@@ -4,7 +4,17 @@ class Group < ApplicationRecord
   has_many :requests
 
   def events
-    result = Event.where(group_id: self.id)
-    events = result.sort_by { |event| event.date }.reverse
+    events = Event.where(group_id: self.id)
+    events.sort_by { |event| event.date }.reverse
+  end
+
+  def members
+    users
+  end
+
+  def membership_requests
+    requests.map do |request|
+      { request: request.id, user: request.user.name, user_id: request.user.id }
+    end
   end
 end

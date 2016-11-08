@@ -19,9 +19,9 @@ Rails.application.routes.draw do
       post '/events/not_attending' => 'events#not_attending'
 
       post '/groups' => 'groups#create_or_update'
-      get '/groups/events/:id' => 'groups#events'
+      post '/groups/events' => 'groups#events'
       post '/groups/add_user' => 'groups#add_user'
-      get '/groups/:id/members' => 'groups#members'
+      post '/groups/members' => 'groups#members'
 
       post '/groups/join' => 'requests#new'
       get 'requests/deny/:id' => 'requests#deny_request'
