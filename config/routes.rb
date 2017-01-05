@@ -16,6 +16,7 @@ Rails.application.routes.draw do
       post '/events/rating' => 'events#add_rating'
       post '/events/attending' => 'events#attending'
       post '/events/show_rating' => 'events#show_rating'
+      post '/events/destroy' => 'events#destroy'
       post '/events/not_attending' => 'events#not_attending'
 
       post '/groups' => 'groups#create_or_update'

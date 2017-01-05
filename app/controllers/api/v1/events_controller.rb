@@ -17,6 +17,12 @@ module Api::V1
       end
     end
 
+    def destroy
+      if event.destroy
+        render plain: "Event has been destroyed."
+      end
+    end
+
     def group_events
       events = Event.where(group_id: params[:group_id])
       render json: events
